@@ -22,13 +22,13 @@ class CorsMiddleware
     	];
 
     	if (env('APP_ENV') == 'local'){
-    		$possibleOrigins[] = 'https://localhost:61922';
+    		$possibleOrigins[] = 'https://localhost:62939';
     	}
 
     	if (in_array($request->header('origin'), $possibleOrigins)) {
     		$origin = $request->header('origin');
     	} else {
-    		$origin = 'http://localhost:61922';
+    		$origin = 'http://localhost:62939';
     	}
 
         $headers = [
