@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
-use App\Http\Controllers\TypeApiController;
+use App\Http\Controllers\AuthController;
 /** @var \Laravel\Lumen\Routing\Router $router */
 
 /*
@@ -19,6 +19,12 @@ use App\Http\Controllers\TypeApiController;
         return $router->app->version();
     });
 
+$router->group(['prefix' => 'auth'], function() use ($router) {
+
+    $router->post('/login', ['uses' => 'AuthController@login']);
+    $router->post('/register', ['uses' => 'AuthController@register']);
+    $router->get('/me', ['uses' => 'AuthController@me']);
+});
 
  $router->group(['namespace' => 'Masters'], function () use ($router) {
     $router->group(['prefix' => 'types'], function () use ($router) {
