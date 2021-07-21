@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
-use App\Http\Controllers\AuthController;
 /** @var \Laravel\Lumen\Routing\Router $router */
 
 /*
@@ -15,39 +13,38 @@ use App\Http\Controllers\AuthController;
 |
 */
 
- $router->get('/', function () use ($router) {
+$router->group(['prefix' => 'auth'], function () use ($router) {
+    $router->post('register', 'AuthController@register');
+    $router->post('login', 'AuthController@login');
+});
+
+$router->group(['middleware' => 'auth'], function () use ($router) {
+    $router->get('/', function () use ($router) {
         return $router->app->version();
     });
 
-$router->group(['prefix' => 'auth'], function() use ($router) {
-
-    $router->post('/login', ['uses' => 'AuthController@login']);
-    $router->post('/register', ['uses' => 'AuthController@register']);
-
-});
-
-$router->group(['middleware' => 'auth','prefix' => 'auth'], function() use ($router) {
-	$router->get('/me', ['uses' => 'AuthController@me']);
-});
-
- $router->group(['namespace' => 'Masters'], function () use ($router) {
-    $router->group(['prefix' => 'types'], function () use ($router) {
-        $router->post('/datatables', ['uses' => 'TypeController@show']);
-        $router->post('/', ['uses' => 'TypeController@store']);
-        $router->get('/{id:[0-9]+}', ['uses' => 'TypeController@find']);
-        $router->get('/select', ['uses' => 'TypeController@select']);
-        $router->post('/update/{id}', ['uses' => 'TypeController@update']);
-        $router->post('/delete/{id}', ['uses' => 'TypeController@delete']);
+    $router->group(['prefix' => 'auth'], function () use ($router) {
+        $router->get('me', 'AuthController@me');
     });
 
-    $router->group(['prefix' => 'product'], function () use ($router) {
-        $router->post('/datatables', ['uses' => 'ProductController@show']);
-        $router->post('/', ['uses' => 'ProductController@store']);
-        $router->get('/{id:[0-9]+}', ['uses' => 'ProductController@find']);
-        $router->get('/select', ['uses' => 'ProductController@select']);
-        $router->post('/update/{id}', ['uses' => 'ProductController@update']);
-        $router->post('/delete/{id}', ['uses' => 'ProductController@delete']);
+    $router->group(['namespace' => 'Masters'], function () use ($router) {
+        $router->group(['prefix' => 'types'], function () use ($router) {
+            $router->post('/datatables', ['uses' => 'TypeController@show']);
+            $router->options('/datatables', ['uses' => 'TypeController@show']);
+            $router->post('/', ['uses' => 'TypeController@store']);
+            $router->get('/{id:[0-9]+}', ['uses' => 'TypeController@find']);
+            $router->get('/select', ['uses' => 'TypeController@select']);
+            $router->put('/{id}', ['uses' => 'TypeController@update']);
+            $router->delete('/{id}', ['uses' => 'TypeController@delete']);
+        });
+
+        $router->group(['prefix' => 'product'], function () use ($router) {
+            $router->post('/datatables', ['uses' => 'ProductController@show']);
+            $router->options('/datatables', ['uses' => 'ProductController@show']);
+            $router->post('/', ['uses' => 'ProductController@store']);
+            $router->get('/{id:[0-9]+}', ['uses' => 'ProductController@find']);
+            $router->put('/{id:[0-9]+}', ['uses' => 'ProductController@update']);
+            $router->delete('/{id:[0-9]+}', ['uses' => 'ProductController@delete']);
+        });
     });
 });
-
-
