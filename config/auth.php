@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Masters\Users;
+use App\Models\Users;
 
 return [
     'defaults' => [

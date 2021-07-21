@@ -23,7 +23,11 @@ $router->group(['prefix' => 'auth'], function() use ($router) {
 
     $router->post('/login', ['uses' => 'AuthController@login']);
     $router->post('/register', ['uses' => 'AuthController@register']);
-    $router->get('/me', ['uses' => 'AuthController@me']);
+
+});
+
+$router->group(['middleware' => 'auth','prefix' => 'auth'], function() use ($router) {
+	$router->get('/me', ['uses' => 'AuthController@me']);
 });
 
  $router->group(['namespace' => 'Masters'], function () use ($router) {

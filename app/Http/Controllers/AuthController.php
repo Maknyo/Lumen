@@ -1,74 +1,63 @@
 <?php
 
-
 namespace App\Http\Controllers;
 
-
+use App\Constant\DBCode;
+use App\Constant\DBMessage;
+use App\Models\Users;
 use Exception;
-use App\Constants\DBCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Masters\Users;
 
 class AuthController extends Controller
 {
+    private $table = 'msuser';
 
     public function __construct()
     {
-   
+        $this->middleware('auth:api', ['except' => ['login', 'register']]);
     }
 
     public function register(Request $request)
     {
-        //validate incoming request 
+        //validate incoming request
         $this->validate($request, [
-        	'fullname' => 'required|string',
-            'username' => 'required|string',
+            'fullname' => 'required|string',
+            'username' => "required|string",
             'userpassword' => 'required|string',
         ]);
 
-        try 
-        {
-            $user = new Users;
-            $user->fullname= $request->input('fullname');
-            $user->username= $request->input('username');
+        try {
+            $user = new Users();
+            $user->fullname = $request->input('fullname');
+            $user->username = $request->input('username');
             $user->userpassword = app('hash')->make($request->input('userpassword'));
             $user->save();
 
-            return response()->json( [
-                        'entity' => 'users', 
-                        'action' => 'create', 
-                        'result' => 'success'
-            ], 201);
+            return $this->jsonSuccess(DBMessage::SUCCESS_ADD);
 
-        } 
-        catch (\Exception $e) 
-        {
-            return response()->json( [
-                       'entity' => 'users', 
-                       'action' => 'create', 
-                       'result' => 'failed'
-            ], 409);
+        } catch (Exception $e) {
+            return $this->jsonError($e);
         }
     }
 
-    public function login(Request $req)
+    public function login(Request $request)
     {
         try {
-
-            $this->customValidate($req->all(), array(
-                'username' => 'required|string',
-                'userpassword' => 'required|string',
+            $this->customValidate($request->all(), array(
+                'username:Nama pengguna' => 'required|string',
+                'password:Kata sandi' => 'required|string',
             ));
 
-            $credentials = $req->only(['username', 'userpassword']);
+            $credentials = $request->only(['username', 'password']);
 
-            if (! $token = Auth::attempt($credentials)) {
-                throw new Exception("Nama pengguna atau kata sandi tidak ditemukan", DBCode::AUTHORIZED_ERROR);
+            if (!$token = Auth::attempt($credentials)) {
+                return response()->json(['message' => DBMessage::USER_NOT_FOUND], DBCode::UNAUTHORIZED);
             }
 
-            $response = \auth()->Users();
+            $response = \auth()->user();
             $response['token'] = $token;
+            $response['token_type'] = 'bearer';	
 
             return $this->jsonSuccess(null, $response);
         } catch (Exception $e) {
@@ -79,7 +68,7 @@ class AuthController extends Controller
     public function me()
     {
         try {
-            return $this->jsonSuccess(null, \auth()->Users());
+            return $this->jsonSuccess(null, \auth()->user());
         } catch (Exception $e) {
             return $this->jsonError($e);
         }
